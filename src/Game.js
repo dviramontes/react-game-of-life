@@ -26,12 +26,26 @@ class Game extends React.Component {
 		this.rows = HEIGHT / CELL_SIZE;
 		this.cols = WIDTH / CELL_SIZE;
 		this.board = this.makeEmptyBoard();
-		this.handleClick = this.handleClick.bind(this);
 	}
 
 	state = {
 		cells: [],
+		interval: 100,
+		isRunning: false,
 	};
+
+	runGame = () => {
+		this.setState({isRunning: true});
+		this.runIteration();
+	}
+
+	stopGame = () => {
+		this.setState({isRunning: false});
+	}
+
+	tick = (e) => {
+		this.setState({interval: e.target.value});
+	}
 
 	// create empty board
 	makeEmptyBoard() {
@@ -68,7 +82,7 @@ class Game extends React.Component {
 		};
 	}
 
-	handleClick(e) {
+	handleClick = (e) => {
 		const elemOffset = this.getElementOffset();
 		const offsetX = e.clientX - elemOffset.x;
 		const offsetY = e.clientY - elemOffset.y;
@@ -83,7 +97,7 @@ class Game extends React.Component {
 	}
 
 	render() {
-		const { cells } = this.state;
+		const {cells, isRunning} = this.state;
 		return (
 			<div>
 				<div className="Board"
@@ -103,8 +117,37 @@ class Game extends React.Component {
 							key={`${cell.x},${cell.y}`}/>
 					))}
 				</div>
+				<div className="controls">
+					Update every
+					<input value={this.state.interval}
+					       onChange={this.tick}/> msec
+					{isRunning ?
+						<button className="button"
+						        onClick={this.stopGame}
+						>STOP</button>
+						:
+						<button className="button"
+						        onClick={this.runGame}
+						>RUN</button>
+					}
+				</div>
 			</div>
 		)
+	}
+
+	runIteration = () => {
+		console.log("running iteration");
+		let newBoard = this.makeEmptyBoard();
+
+		// TODO: interation logic
+
+		this.board = newBoard;
+		this.setState({ cells: this.makeCells()} );
+
+		this.timeoutHandler = window.setTimeout(() => {
+			this.runIteration()
+		}, this.state.interval);
+
 	}
 }
 
